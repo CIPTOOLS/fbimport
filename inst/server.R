@@ -17,7 +17,7 @@ library(dplyr)
 # import_fb_db <- dbConnect(SQLite(), dbname="Import_fb_db.sqlite")
 # db <- RSQLite::dbReadTable(import_fb_db,name = "Import_fb_table")
 # print(db)
- print(getwd())
+ #print(getwd())
 
 shinyServer( function(input, output, session) {
   
@@ -37,26 +37,25 @@ shinyServer( function(input, output, session) {
        }
    })
    
-   minimal_param <- reactive({
-     if(length(hot_file)==0){return (NULL)}
-        if(length(hot_file)>0){
-        excel_data <- get_excel_sheet_data(hot_file)
-        minimal_param <- get_minimal_sheet_params(excel_data = excel_data) 
-      }
-   })
-   
-   
-#     observe({
-#       if (input$id_success == 0) 
-#       return()
-#       
-#       hot_file <- hot_path() 
-#       if(length(hot_file)==0){return (NULL)}
-#       if(length(hot_file)>0){
+#    minimal_param <- reactive({
+#      if(length(hot_file)==0){return (NULL)}
+#         if(length(hot_file)>0){
+#         excel_data <- get_excel_sheet_data(hot_file)
+#         minimal_param <- get_minimal_sheet_params(excel_data = excel_data) 
+#       }
+#    })
+#    
+#    
+    observe({
+      if (input$id_success == 0) 
+      return()
+      hot_file <- hot_path() 
+      if(length(hot_file)==0){return (NULL)}
+      if(length(hot_file)>0){
 #         excel_data <- get_excel_sheet_data(hot_file)
 #         minimal_param <- get_minimal_sheet_params(excel_data = excel_data) 
 #         excel_to_rda(excel_data)
-#         db <- readRDS("import_register.rds")
+        #db <- readRDS("import_register.rds")
 #         insert_row <- data.frame(Fbname = minimal_param$ minimal_fbname,      
 #                                  Crop=minimal_param$minimal_crop,   
 #                                  Trial=minimal_param$minimal_trial,
@@ -65,41 +64,65 @@ shinyServer( function(input, output, session) {
 #                                  Collaborator=minimal_param$minimal_collaborators, 
 #                                  Leader=minimal_param$minimal_leader)
 #         
-#         
-#       }
-#       showshinyalert(session, "shinyalert1", paste("Your file has been saved", "success"), 
-#                      styleclass = "success")
-#     })
+        
+      }
+      showshinyalert(session, "shinyalert1", paste("Your file has been saved", "success"), 
+                     styleclass = "success")
+    })
 #     
-   values <- reactiveValues()
-   values$df <- data.frame(Column1 = NA, Column2 = NA)
-   import_fb_data <- data.frame(Fbname=minimal_param()$minimal_fbname,
-                                Crop=minimal_param()$minimal_crop,
-                                Trial = minimal_param()$minimal_trial, 
-                                Country= minimal_param()$minimal_country,  Begin_date=minimal_param$minimal_begindate , 
-                                Collaborators=minimal_param()$minimal_collaborators, 
-                                Leader=minimal_param()$minimal_leader) 
-   
-   newEntry <- observe({
-     if (input$id_success == 0) 
-           return()
-       newLine <- isolate(c(input$text1, input$text2))
-       isolate(values$df <- rbind(values$df, newLine))
-     
-   })
-   
+#    values <- reactiveValues()
+#    values$df <- data.frame(Column1 = NA, Column2 = NA)
+#    import_fb_data <- data.frame(Fbname=minimal_param()$minimal_fbname,
+#                                 Crop=minimal_param()$minimal_crop,
+#                                 Trial = minimal_param()$minimal_trial, 
+#                                 Country= minimal_param()$minimal_country,  Begin_date=minimal_param$minimal_begindate , 
+#                                 Collaborators=minimal_param()$minimal_collaborators, 
+#                                 Leader=minimal_param()$minimal_leader) 
+#    
+#    newEntry <- observe({
+#      if (input$id_success == 0) 
+#            return()
+#        newLine <- isolate(c(input$text1, input$text2))
+#        isolate(values$df <- rbind(values$df, newLine))
+#      
+#    })
+#    
      
    db <- reactive({
      #import_fb_db <- dbConnect(SQLite(), dbname="Import_fb_db.sqlite")
      #db <- RSQLite::dbReadTable(import_fb_db,name = "Import_fb_table")
      #RSQLite::dbDisconnect(import_fb_db)
-     db <- readRDS("D:/GITHUB_HIDAP_MOD/fbimport/data/import_fb_data.rds")
-     db
+     #db <- readRDS("D:/GITHUB_HIDAP_MOD/fbimport/data/import_fb_data.rds")
+     db <- readRDS("C:/OMAR-2015/GitHubProjects/fbimport/data/import_fb_data.rds")
+     
    })
     
     output$the_data <- renderDataTable({
       #import()
+      #if(input$file)
+      hot_file <- hot_path() 
       DT::datatable(db())
+        if(length(hot_file)>0 && length(input$refresh)>0){
+         
+          excel_data <- get_excel_sheet_data(hot_file)
+          minimal_param <- get_minimal_sheet_params(excel_data = excel_data) 
+          excel_to_rda(excel_data)
+          
+          insert_row <- data.frame(Fbname = minimal_param$minimal_fbname,      
+                                   Crop=minimal_param$minimal_crop,   
+                                   Trial=minimal_param$minimal_trial,
+                                   Country=minimal_param$minimal_country,
+                                   Begin_date=minimal_param$minimal_begindate,
+                                   Collaborators=minimal_param$minimal_collaborators, 
+                                   Leader=minimal_param$minimal_leader)
+          
+          db <- readRDS("C:/OMAR-2015/GitHubProjects/fbimport/data/import_fb_data.rds")
+          db <- rbind(db,insert_row) 
+          saveRDS(object = db,file = "C:/OMAR-2015/GitHubProjects/fbimport/data/import_fb_data.rds")
+          db <- readRDS(file = "C:/OMAR-2015/GitHubProjects/fbimport/data/import_fb_data.rds")
+          DT::datatable(db)
+          
+          }
     })
     
 #     import <- reactive({

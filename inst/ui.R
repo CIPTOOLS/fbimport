@@ -54,7 +54,8 @@ shinyUI(
                                      #DT::dataTableOutput("the_data") ,width = NULL, height = NULL)
                                      actionButton("id_success","Save",styleclass="success",icon = "ok"),
                                      shinyalert("shinyalert1", FALSE,auto.close.after = 5)
-                                     ),
+                                     
+                                    ),
                              br(),
                              box(
                              #actionButton("calculate", "Calculate",icon("play-circle-o")),
@@ -62,7 +63,8 @@ shinyUI(
                              #actionLink('exportButton', 'Download data'),
                              #HTML('</div>'),
                              #p(),
-                             DT::dataTableOutput("the_data") ,width = NULL, height = NULL)
+                             DT::dataTableOutput("the_data") ,width = NULL, height = NULL),
+                             shiny::actionButton("refresh",label = "Refresh")
                            )
                           ),
                           
